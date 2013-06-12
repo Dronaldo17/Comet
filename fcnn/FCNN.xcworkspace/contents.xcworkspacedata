@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:CometTest/CometTest.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Dyci/Dyci.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:uilib/uilib.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:FMDB/FMDB.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Analytics/Analytics.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TabBarKit/TabBarKit.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:SBJson/SBJson.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:ASIHttp/ASIHttp.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Parse/Parse.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Tapku/Tapku.xcodeproj">
+   </FileRef>
+</Workspace>
