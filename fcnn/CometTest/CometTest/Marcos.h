@@ -22,6 +22,6 @@
 #define SPEAKER_SELF @"SPEAKER_SELF"
 #define SPEAKER_OTHER @"SPEAKER_OTHER"
 
-#define TimeOut 60.0f
+#define TimeOut 300.0f
 
 #endif

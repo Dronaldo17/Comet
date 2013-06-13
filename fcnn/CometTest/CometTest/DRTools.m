@@ -7,6 +7,7 @@
 //
 
 #import "DRTools.h"
+#import "ASIHttpRequest.h"
 
 @implementation DRTools
 +(id)getValueFromNSUserDefaultsByKey:(NSString*)key
@@ -39,5 +40,49 @@
     NSString *strDate = [dateFormatter stringFromDate:date];
     [dateFormatter release];
     return strDate;
+}
++(NSString*)parseHttpError:(NSError*)error
+{
+    NSString * message = nil;
+    switch ([error code])
+    {
+        case ASIRequestTimedOutErrorType:
+            message = @"链接超时";
+            break;
+        case ASIConnectionFailureErrorType:
+            message = @"连接失败";
+            break;
+        case ASIAuthenticationErrorType:
+            message = @"kAlertMsgAuthFailError";
+            break;
+        case ASITooMuchRedirectionErrorType:
+            message = @"kAlertMsgTooManyRedirect";
+            break;
+        case ASIRequestCancelledErrorType:
+            message = @"kAlertMsgReqCancelledError";
+            break;
+        case ASIUnableToCreateRequestErrorType:
+            message = @"kAlertMsgUnableCreateReqError";
+            break;
+        case ASIInternalErrorWhileBuildingRequestType:
+            message = @"kAlertMsgUnableBuildReqError";
+            break;
+        case ASIInternalErrorWhileApplyingCredentialsType:
+            message = @"kAlertMsgUnableApplyCredError";
+            break;
+        case ASIFileManagementError:
+            message = @"kAlertMsgFileManageError";
+            break;
+        case ASIUnhandledExceptionError:
+            message = @"kAlertMsgUnhandledExcepError";
+            break;
+        case ASICompressionError:
+            message = @"kAlertMsgCompressionError";
+            break;
+        default:
+            message = @"kAlertMsgGenericError";
+            break;
+    }
+    return message;
 }
 @end

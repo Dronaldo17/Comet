@@ -17,15 +17,8 @@
 @synthesize xsrf,sendString,receiveString;
 - (void)dealloc
 {
-    if (_authLoginRequest) {
-        Block_release(_authLoginRequest);
-    }
-    _authLoginRequest = nil;
-    if (_receiveRequest) {
-        Block_release(_receiveRequest);
-    }
-    _receiveRequest = nil;
-    
+    [self clearAuthRequest];
+    [self clearReceiveRequest];
     self.xsrf = nil;
     self.sendString = nil;
     self.receiveString = nil;
@@ -130,31 +123,10 @@
    
     [self setATimeStampByType:@"请求发起时间"];
 
+    [_receiveRequest setDidFinishSelector:@selector(receiveMessageSuccess:)];
+    [_receiveRequest setDidFailSelector:@selector(receiveMessageFailed:)];
+    [_receiveRequest setDelegate:self];
     
-    [_receiveRequest setCompletionBlock:^{
-         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-        [self setATimeStampByType:@"成功接受消息时间"];
-        NSString * responseString = [_receiveRequest  responseString];
-        NSLog(@"responseString is %@",responseString);
-                NSMutableDictionary * dict = [responseString JSONValue];
-        NSLog(@"dict is %@",dict);
-        NSMutableDictionary * tmpDict = [NSMutableDictionary dictionaryWithCapacity:2];
-        tmpDict = dict[@"messages"][0];
-        
-        NSString * receivedMessage = [NSString stringWithFormat:@"%@:%@",tmpDict[@"from"],tmpDict[@"body"]];
-        [self updateUIFromSpeaker:SPEAKER_OTHER byMessage:receivedMessage];
-        [self clearRequest:_receiveRequest];
-        [self reciveMessage];
-    }];
-    [_receiveRequest setFailedBlock:^{
-         [self setATimeStampByType:@"请求失败重连时间"];
-         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-        NSError * error = [_receiveRequest error];
-        NSLog(@"error is %@",[error localizedDescription]);
-        [DRTools tapAlertWithMessage:@"长链失败,重新建立链接"];
-        [self clearRequest:_receiveRequest];
-        [self reciveMessage];
-    }];
     [_receiveRequest startAsynchronous];
 }
 -(void)updateUIFromSpeaker:(NSString*)speaker byMessage:(NSString*)message
@@ -178,14 +150,12 @@
         [sendRequest setCompletionBlock:^{
             NSString * responseString = [sendRequest  responseString];
             NSLog(@"responseString is %@",responseString);
-            [self clearRequest:sendRequest];
             [DRTools tapAlertWithMessage:@"发送成功"];
         
         }];
         [sendRequest setFailedBlock:^{
             NSError * error = [sendRequest error];
             NSLog(@"error is %@",[error localizedDescription]);
-            [self clearRequest:sendRequest];
             [DRTools tapAlertWithMessage:@"发送失败"];
         }];
         [sendRequest  startAsynchronous];
@@ -199,39 +169,50 @@
     [self updateUIFromSpeaker:nil byMessage:[NSString stringWithFormat:@"%@:%@",type,waitString]];
     
 }
--(void)clearRequest:(ASIHTTPRequest*)request
+-(void)clearReceiveRequest
 {
-    if (request) {
-        [request clearDelegatesAndCancel];
-        Block_release(request);
-        request = nil;
+    if (_receiveRequest) {
+        [_receiveRequest clearDelegatesAndCancel];
+        [_receiveRequest release];
+        _receiveRequest = nil;
 
     }
 }
-//-(void)receiveMessageSuccess:(ASIHTTPRequest*)request
-//{
-//           NSString * responseString = [request  responseString];
-//            NSLog(@"responseString is %@",responseString);
-//                    NSMutableDictionary * dict = [responseString JSONValue];
-//            NSLog(@"dict is %@",dict);
-//    
-//        NSMutableDictionary * tmpDict = [NSMutableDictionary dictionaryWithCapacity:2];
-//        tmpDict = dict[@"messages"][0];
-//    
-//    
-//            NSString * receivedMessage = [NSString stringWithFormat:@"%@:%@",tmpDict[@"from"],tmpDict[@"body"]];
-//            [self.receiveString appendString:receivedMessage];
-//            [self reciveMessage];
-//           
-//
-//}
-//-(void)receiveMessageFailed:(ASIHTTPRequest*)request
-//{
-//    [request cancel];
-//    NSError * error = [_receiveRequest error];
-//    NSLog(@"error is %@",error);
-//    [self reciveMessage];
-//}
+-(void)clearAuthRequest
+{
+    if (_authLoginRequest) {
+        [_authLoginRequest clearDelegatesAndCancel];
+        [_authLoginRequest release];
+        _authLoginRequest = nil;
+    }
+}
+-(void)receiveMessageSuccess:(ASIHTTPRequest*)request
+{
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    [self setATimeStampByType:@"成功接受消息时间"];
+    NSString * responseString = [request  responseString];
+    NSLog(@"responseString is %@",responseString);
+    NSMutableDictionary * dict = [responseString JSONValue];
+    NSLog(@"dict is %@",dict);
+    NSMutableDictionary * tmpDict = [NSMutableDictionary dictionaryWithCapacity:2];
+    tmpDict = dict[@"messages"][0];
+    
+    NSString * receivedMessage = [NSString stringWithFormat:@"%@:%@",tmpDict[@"from"],tmpDict[@"body"]];
+    [self updateUIFromSpeaker:SPEAKER_OTHER byMessage:receivedMessage];
+    [self clearReceiveRequest];
+    [self reciveMessage];
+}
+-(void)receiveMessageFailed:(ASIHTTPRequest*)request
+{
+    [self setATimeStampByType:@"请求失败重连时间"];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    NSError * error = [request error];
+    NSString * errorMessage = [DRTools parseHttpError:error];
+    NSLog(@"error is %@",[error localizedDescription]);
+    [DRTools tapAlertWithMessage:errorMessage];
+    [self clearReceiveRequest];
+    [self reciveMessage];
+}
 
 #pragma mark  键盘的收起
 -(BOOL)textFieldShouldReturn:(UITextField *)textField

@@ -22,4 +22,6 @@
 /**Author:Ronaldo Description:NSDate转NSString*/
 +(NSString*)stringFromADate:(NSDate*)date withFormat:(NSString*)format;
 
+/**Author:Ronaldo Description:解析ASIHttp错误码*/
++(NSString*)parseHttpError:(NSError*)error;
 @end
