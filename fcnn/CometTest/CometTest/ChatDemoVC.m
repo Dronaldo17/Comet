@@ -18,11 +18,11 @@
 - (void)dealloc
 {
     if (_authLoginRequest) {
-        [_authLoginRequest release];
+        Block_release(_authLoginRequest);
     }
     _authLoginRequest = nil;
     if (_receiveRequest) {
-        [_receiveRequest release];
+        Block_release(_receiveRequest);
     }
     _receiveRequest = nil;
     
@@ -64,11 +64,17 @@
     [_inputBox resignFirstResponder];
     NSString * sendMessage = [NSString stringWithFormat:@"我:%@",[_inputBox text]];
     [_inputBox setText:@""];
-    [self updateUIFromSpeaker:sendMessage message:sendMessage];
+    [self updateUIFromSpeaker:sendMessage byMessage:sendMessage];
+    [self sendMessageRequestWithMessage:sendMessage];
 }
 -(IBAction)handUpdateMessage:(id)sender
 {
-    
+    if (_receiveRequest) {
+        [_receiveRequest clearDelegatesAndCancel];
+        Block_release(_receiveRequest);
+        _receiveRequest = nil;
+    }
+    [self reciveMessage];
 }
 #pragma 生成comet 请求
 -(void)authlogin
@@ -76,7 +82,7 @@
     NSURL * url = [NSURL URLWithString:LOGIN_API];
     
     if (!_authLoginRequest) {
-        _authLoginRequest = [[[ASIHTTPRequest alloc] initWithURL:url] autorelease] ;
+        _authLoginRequest = [[ASIHTTPRequest alloc] initWithURL:url]  ;
     }
     else{
         _authLoginRequest.url = url;
@@ -91,6 +97,9 @@
         
         self.xsrf = dict[VALUE];
         [DRTools syncNSUserDeafaultsByKey:XSRF withValue:self.xsrf];
+        [_authLoginRequest clearDelegatesAndCancel];
+        [_authLoginRequest release];
+          _authLoginRequest = nil;
         [self reciveMessage];
     }];
     
@@ -98,6 +107,9 @@
         [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSError * error = [_authLoginRequest error];
         NSLog(@"error is %@",error);
+       [_authLoginRequest clearDelegatesAndCancel];
+        [_authLoginRequest release];
+        _authLoginRequest = nil;
     }];
     [_authLoginRequest startAsynchronous];
 }
@@ -113,44 +125,88 @@
     [_receiveRequest  setRequestMethod:@"POST"];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     [_receiveRequest  setPostValue:self.xsrf forKey:XSRF];
-    [_receiveRequest setTimeOutSeconds:60.0f];
+    
+    [_receiveRequest setTimeOutSeconds:TimeOut];
+   
+    [self setATimeStampByType:@"请求发起时间"];
 
-    
-//    [_receiveRequest setDidFinishSelector:@selector(receiveMessageSuccess:)];
-//    [_receiveRequest setDidFailSelector:@selector(receiveMessageFailed:)];
-//    [_receiveRequest setDelegate:self];
-//    [_receiveRequest startAsynchronous];
-    
     
     [_receiveRequest setCompletionBlock:^{
          [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+        [self setATimeStampByType:@"成功接受消息时间"];
         NSString * responseString = [_receiveRequest  responseString];
         NSLog(@"responseString is %@",responseString);
                 NSMutableDictionary * dict = [responseString JSONValue];
         NSLog(@"dict is %@",dict);
         NSMutableDictionary * tmpDict = [NSMutableDictionary dictionaryWithCapacity:2];
         tmpDict = dict[@"messages"][0];
+        
         NSString * receivedMessage = [NSString stringWithFormat:@"%@:%@",tmpDict[@"from"],tmpDict[@"body"]];
-        [self updateUIFromSpeaker:SPEAKER_OTHER message:receivedMessage];
-        [_receiveRequest cancel];
-        [_receiveRequest release];
-        _receiveRequest = nil;
+        [self updateUIFromSpeaker:SPEAKER_OTHER byMessage:receivedMessage];
+        [self clearRequest:_receiveRequest];
         [self reciveMessage];
     }];
     [_receiveRequest setFailedBlock:^{
+         [self setATimeStampByType:@"请求失败重连时间"];
          [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSError * error = [_receiveRequest error];
-        NSLog(@"error is %@",error);
-        [_receiveRequest cancel];
-        [_receiveRequest release];
-         _receiveRequest = nil;
+        NSLog(@"error is %@",[error localizedDescription]);
+        [DRTools tapAlertWithMessage:@"长链失败,重新建立链接"];
+        [self clearRequest:_receiveRequest];
         [self reciveMessage];
     }];
     [_receiveRequest startAsynchronous];
 }
--(void)updateUIFromSpeaker:(NSString*)speaker message:(NSString*)message
+-(void)updateUIFromSpeaker:(NSString*)speaker byMessage:(NSString*)message
 {
      _textView.text =[NSString stringWithFormat:@"%@\r\n%@",_textView.text,message];
+}
+-(void)sendMessageRequestWithMessage:(NSString*)message
+{
+    if ( nil == message || [message length] <= 0) {
+        
+    }
+    else{
+        NSURL * url = [NSURL URLWithString:SEND_API];
+      __block  ASIFormDataRequest * sendRequest = [[[ASIFormDataRequest alloc] initWithURL:url] autorelease];
+        [sendRequest setRequestMethod:@"POST"];
+        [sendRequest setPostValue:self.xsrf forKey:XSRF];
+        [sendRequest setPostValue:message forKey:@"body"];
+        
+        
+        
+        [sendRequest setCompletionBlock:^{
+            NSString * responseString = [sendRequest  responseString];
+            NSLog(@"responseString is %@",responseString);
+            [self clearRequest:sendRequest];
+            [DRTools tapAlertWithMessage:@"发送成功"];
+        
+        }];
+        [sendRequest setFailedBlock:^{
+            NSError * error = [sendRequest error];
+            NSLog(@"error is %@",[error localizedDescription]);
+            [self clearRequest:sendRequest];
+            [DRTools tapAlertWithMessage:@"发送失败"];
+        }];
+        [sendRequest  startAsynchronous];
+    }
+
+}
+-(void)setATimeStampByType:(NSString*)type
+{
+    NSString * waitString = [DRTools stringFromADate:[NSDate date] withFormat:@"hh:mm:ss"];
+    
+    [self updateUIFromSpeaker:nil byMessage:[NSString stringWithFormat:@"%@:%@",type,waitString]];
+    
+}
+-(void)clearRequest:(ASIHTTPRequest*)request
+{
+    if (request) {
+        [request clearDelegatesAndCancel];
+        Block_release(request);
+        request = nil;
+
+    }
 }
 //-(void)receiveMessageSuccess:(ASIHTTPRequest*)request
 //{
@@ -181,6 +237,7 @@
 -(BOOL)textFieldShouldReturn:(UITextField *)textField
 {
     [textField resignFirstResponder];
+    [self sendMessage:nil];
     return YES;
 }
 @end

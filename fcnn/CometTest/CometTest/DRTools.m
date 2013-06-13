@@ -9,7 +9,6 @@
 #import "DRTools.h"
 
 @implementation DRTools
-/**Author:Ronaldo Description:从本地NSUserDefaults取出值*/
 +(id)getValueFromNSUserDefaultsByKey:(NSString*)key
 {
     if (key) {
@@ -19,7 +18,6 @@
     }
     return nil;
 }
-/**Author:Ronaldo Description:同步NSUserDefaults数据*/
 +(void)syncNSUserDeafaultsByKey:(NSString*)key withValue:(id)value
 {
     if (key && value) {
@@ -28,5 +26,18 @@
         [defaults  synchronize];
     }
 }
-
++(void)tapAlertWithMessage:(NSString*)message
+{
+    [[TKAlertCenter defaultCenter] postAlertWithMessage:message];
+}
++(NSString*)stringFromADate:(NSDate*)date withFormat:(NSString*)format;
+{
+    if (isNull(date) || isEmpty(format)) {
+        return nil;
+    }
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init]; [dateFormatter setDateFormat:format];
+    NSString *strDate = [dateFormatter stringFromDate:date];
+    [dateFormatter release];
+    return strDate;
+}
 @end

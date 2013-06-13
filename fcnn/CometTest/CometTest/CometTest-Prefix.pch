@@ -13,4 +13,6 @@
     #import <Foundation/Foundation.h>
     #import "Marcos.h"
     #import "DRTools.h"
+    #import "Tapku.h"
+    #import "Parse.h"
 #endif

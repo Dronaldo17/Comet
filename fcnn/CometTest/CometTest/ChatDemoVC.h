@@ -14,8 +14,8 @@
 {
     IBOutlet UITextView * _textView;
     IBOutlet UITextField * _inputBox;
-    ASIHTTPRequest * _authLoginRequest;
-    ASIFormDataRequest * _receiveRequest;
+   __block ASIHTTPRequest * _authLoginRequest;
+   __block ASIFormDataRequest * _receiveRequest;
 }
 @property (nonatomic,retain)NSMutableString * sendString;
 @property (nonatomic,retain)NSMutableString * receiveString;
