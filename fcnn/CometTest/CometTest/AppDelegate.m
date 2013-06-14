@@ -68,16 +68,17 @@
 #pragma 网络实时监控
 -(void)monitorNetWork
 {
-    Reachability * hostReach = [Reachability reachabilityWithHostName: @"www.baidu.com"];
+    Reachability * hostReach = [[Reachability reachabilityWithHostName: @"www.baidu.com"] retain];
 	[hostReach startNotifier];
     [self addNotifications];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(netWorkType:) name:kReachabilityChangedNotification object:hostReach];
+
 }
 #pragma mark
 #pragma 网络变化的通知
 -(void)addNotifications
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(netWorkType:) name:kReachabilityChangedNotification object:nil];
-}
+    }
 -(void)removeAllNotifications
 {
     [[NSNotificationCenter defaultCenter] removeAllNotifications];

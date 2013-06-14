@@ -246,10 +246,11 @@
 }
 -(void)noNetWork:(NSNotification*)notification
 {
-    [self clearAuthRequest];
+    [self clearReceiveRequest];
 }
 -(void)networkIsOK:(NSNotification*)notification
 {
+    [self clearReceiveRequest];
     [self reciveMessage];
 }
 @end
