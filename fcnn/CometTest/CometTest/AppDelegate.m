@@ -9,10 +9,12 @@
 #import "AppDelegate.h"
 #import "ChatDemoVC.h"
 
+
 @implementation AppDelegate
 
 - (void)dealloc
 {
+    [self removeAllNotifications];
     [_window release];
     [super dealloc];
 }
@@ -22,11 +24,17 @@
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
+    
+    [self monitorNetWork];
+    
+    
     ChatDemoVC * chatVC = [[ChatDemoVC alloc] init];
     UINavigationController * nav = [[UINavigationController  alloc] initWithRootViewController:chatVC];
     [chatVC release];
     self.window.rootViewController = nav;
     [nav release];
+    
+    
     [self.window makeKeyAndVisible];
     return YES;
 }
@@ -57,10 +65,46 @@
 {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
-#pragma 测试
--(void)test
+#pragma 网络实时监控
+-(void)monitorNetWork
 {
-//    ASIHTTPRequest * request = [];
-
+    Reachability * hostReach = [Reachability reachabilityWithHostName: @"www.baidu.com"];
+	[hostReach startNotifier];
+    [self addNotifications];
+}
+#pragma mark
+#pragma 网络变化的通知
+-(void)addNotifications
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(netWorkType:) name:kReachabilityChangedNotification object:nil];
+}
+-(void)removeAllNotifications
+{
+    [[NSNotificationCenter defaultCenter] removeAllNotifications];
+}
+-(void)netWorkType:(NSNotification*)notification
+{
+    Reachability* currentReach = [notification object];
+    NetworkStatus netStatus = [currentReach currentReachabilityStatus];
+    switch (netStatus) {
+        case NotReachable:{
+            NSLog(@"没网");
+            [[NSNotificationCenter defaultCenter] postNotificationName:NETWORK_NO_NETWORK object:nil];
+        }
+            break;
+        case ReachableViaWiFi:{
+            [[NSNotificationCenter defaultCenter] postNotificationName:NETWORK_WIFI object:nil];
+        }
+            break;
+        case ReachableViaWWAN:{
+            NSLog(@"3G网络或者2G网络");
+            [[NSNotificationCenter defaultCenter] postNotificationName:NETWORK_2G_OR_3G object:nil];
+            
+        }
+            break;
+            
+        default:
+            break;
+    }
 }
 @end

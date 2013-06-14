@@ -45,7 +45,16 @@
         [self authlogin];
     }
 }
-
+-(void)viewWillAppear:(BOOL)animated
+{
+    [super viewWillAppear:animated];
+    [self addNotifications];
+}
+-(void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [self removeAllNotifications];
+}
 - (void)didReceiveMemoryWarning
 {
     [super didReceiveMemoryWarning];
@@ -120,6 +129,8 @@
     [_receiveRequest  setPostValue:self.xsrf forKey:XSRF];
     
     [_receiveRequest setTimeOutSeconds:TimeOut];
+    [_receiveRequest setShouldAttemptPersistentConnection:NO];
+    [_receiveRequest setNumberOfTimesToRetryOnTimeout:0];
    
     [self setATimeStampByType:@"请求发起时间"];
 
@@ -142,7 +153,7 @@
         NSURL * url = [NSURL URLWithString:SEND_API];
       __block  ASIFormDataRequest * sendRequest = [[[ASIFormDataRequest alloc] initWithURL:url] autorelease];
         [sendRequest setRequestMethod:@"POST"];
-        [sendRequest setPostValue:self.xsrf forKey:XSRF];
+       [sendRequest setPostValue:self.xsrf forKey:XSRF];
         [sendRequest setPostValue:message forKey:@"body"];
         
         
@@ -220,5 +231,25 @@
     [textField resignFirstResponder];
     [self sendMessage:nil];
     return YES;
+}
+
+#pragma 监控网络
+-(void)addNotifications
+{
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(noNetWork:) name:NETWORK_NO_NETWORK object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(networkIsOK:) name:NETWORK_WIFI object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(networkIsOK:) name:NETWORK_2G_OR_3G object:nil];
+}
+-(void)removeAllNotifications
+{
+    [[NSNotificationCenter defaultCenter] removeAllNotifications];
+}
+-(void)noNetWork:(NSNotification*)notification
+{
+    [self clearAuthRequest];
+}
+-(void)networkIsOK:(NSNotification*)notification
+{
+    [self reciveMessage];
 }
 @end

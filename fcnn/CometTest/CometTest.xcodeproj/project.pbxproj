@@ -55,8 +55,8 @@
 		950408901768C5F800DC6DAB /* SBJsonParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SBJsonParser.m; sourceTree = "<group>"; };
 		950408911768C5F800DC6DAB /* SBJsonWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SBJsonWriter.h; sourceTree = "<group>"; };
 		950408921768C5F800DC6DAB /* SBJsonWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SBJsonWriter.m; sourceTree = "<group>"; };
-		9591CFEE1769549A00D70939 /* libTapku.a */ = {isa = PBXFileReference; lastKnownFileType = file; name = libTapku.a; path = "../Tapku/build/Release-iphoneos/libTapku.a"; sourceTree = "<group>"; };
-		9591CFF01769607E00D70939 /* libParse.a */ = {isa = PBXFileReference; lastKnownFileType = file; name = libParse.a; path = "../Parse/build/Release-iphoneos/libParse.a"; sourceTree = "<group>"; };
+		9591CFEE1769549A00D70939 /* libTapku.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libTapku.a; path = "../Tapku/build/Release-iphoneos/libTapku.a"; sourceTree = "<group>"; };
+		9591CFF01769607E00D70939 /* libParse.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libParse.a; path = "../Parse/build/Release-iphoneos/libParse.a"; sourceTree = "<group>"; };
 		9591CFF2176960D000D70939 /* libiconv.2.4.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.2.4.0.dylib; path = usr/lib/libiconv.2.4.0.dylib; sourceTree = SDKROOT; };
 		95C2580B176795B70072552F /* CometTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CometTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		95C2580E176795B70072552F /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -136,7 +136,6 @@
 		95C25802176795B70072552F = {
 			isa = PBXGroup;
 			children = (
-				9591CFF2176960D000D70939 /* libiconv.2.4.0.dylib */,
 				95C25814176795B70072552F /* CometTest */,
 				95C2580D176795B70072552F /* Frameworks */,
 				95C2580C176795B70072552F /* Products */,
@@ -154,6 +153,7 @@
 		95C2580D176795B70072552F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				9591CFF2176960D000D70939 /* libiconv.2.4.0.dylib */,
 				9591CFF01769607E00D70939 /* libParse.a */,
 				9591CFEE1769549A00D70939 /* libTapku.a */,
 				95C258631767A9240072552F /* libxml2.2.dylib */,
