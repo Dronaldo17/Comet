@@ -19,6 +19,7 @@
 {
     [self clearAuthRequest];
     [self clearReceiveRequest];
+    [self removeAllNotifications];
     self.xsrf = nil;
     self.sendString = nil;
     self.receiveString = nil;
@@ -53,7 +54,6 @@
 -(void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-    [self removeAllNotifications];
 }
 - (void)didReceiveMemoryWarning
 {
@@ -90,7 +90,6 @@
         _authLoginRequest.url = url;
     }
       [_authLoginRequest setCompletionBlock:^{
-          [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSArray * responseCookies = [_authLoginRequest responseCookies];
         NSLog(@"responseCookies is %@",responseCookies);
         NSHTTPCookie * cooke = [responseCookies objectAtIndex:0];
@@ -106,7 +105,6 @@
     }];
     
     [_authLoginRequest setFailedBlock:^{
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
         NSError * error = [_authLoginRequest error];
         NSLog(@"error is %@",error);
        [_authLoginRequest clearDelegatesAndCancel];
@@ -117,6 +115,7 @@
 }
 -(void)reciveMessage
 {
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
     NSURL * url = [NSURL URLWithString:RECEIVE_API];
     if (!_receiveRequest) {
         _receiveRequest = [[ASIFormDataRequest alloc] initWithURL:url];
@@ -144,6 +143,7 @@
 {
      _textView.text =[NSString stringWithFormat:@"%@\r\n%@",_textView.text,message];
 }
+/**Author:Ronaldo Description:发送需要另外字段  暂无法准确捕获*/
 -(void)sendMessageRequestWithMessage:(NSString*)message
 {
     if ( nil == message || [message length] <= 0) {
@@ -250,7 +250,11 @@
 }
 -(void)networkIsOK:(NSNotification*)notification
 {
-    [self clearReceiveRequest];
-    [self reciveMessage];
+    if (_receiveRequest) {
+        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    }
+    else{
+        [self reciveMessage];
+    }
 }
 @end
