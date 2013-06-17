@@ -1,7 +1,0 @@
-//
-// Prefix header for all source files of the 'TabBarKit' target in the 'TabBarKit' project
-//
-
-#ifdef __OBJC__
-    #import <Foundation/Foundation.h>
-#endif

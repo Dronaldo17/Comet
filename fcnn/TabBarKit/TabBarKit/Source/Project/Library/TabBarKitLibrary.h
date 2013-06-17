@@ -1,5 +1,0 @@
-
-@class NSString;
-
-NSString * 
-TabBarKitLibraryGetVersion();
